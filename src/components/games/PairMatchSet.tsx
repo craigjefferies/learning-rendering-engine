@@ -30,6 +30,7 @@ export function PairMatchSet({
   // For the current question's matching state
   const [matches, setMatches] = useState<Map<string, string>>(new Map())
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null)
+  const [shuffledRightItems, setShuffledRightItems] = useState<string[]>([])
 
   const currentQuestion = spec.questions[currentQuestionIndex]
   const totalQuestions = spec.questions.length
@@ -39,12 +40,31 @@ export function PairMatchSet({
     return questionMatches && questionMatches.length === q.pairs.length
   })
 
+  // Shuffle array using Fisher-Yates algorithm
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+  }
+
   // Fade in effect when question changes with slide animation
   useEffect(() => {
     setFadeIn(false)
     const timer = setTimeout(() => setFadeIn(true), 100)
     return () => clearTimeout(timer)
   }, [currentQuestionIndex])
+
+  // Shuffle right items when question changes
+  useEffect(() => {
+    const allRightItems = [
+      ...currentQuestion.pairs.map((p) => p.right),
+      ...(currentQuestion.distractorsRight || []),
+    ]
+    setShuffledRightItems(shuffleArray(allRightItems))
+  }, [currentQuestionIndex, currentQuestion])
 
   // Initialize matches from saved answer when question changes
   useEffect(() => {
@@ -139,12 +159,6 @@ export function PairMatchSet({
     setSelectedLeft(null)
     onReset()
   }
-
-  // Get all available right items (including distractors)
-  const allRightItems = [
-    ...currentQuestion.pairs.map((p) => p.right),
-    ...(currentQuestion.distractorsRight || []),
-  ]
 
   // Get matched right items
   const matchedRightItems = new Set(matches.values())
@@ -254,7 +268,7 @@ export function PairMatchSet({
             <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
               Matches
             </h4>
-            {allRightItems.map((rightItem) => {
+            {shuffledRightItems.map((rightItem) => {
               const isMatched = matchedRightItems.has(rightItem)
               const isClickable = selectedLeft && !disabled && !evaluation
               return (

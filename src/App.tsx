@@ -88,10 +88,8 @@ export default function App() {
       return evaluation && evaluation.correct
     })
 
-    // Count total questions across all specs
-    let totalQuestions = 0
-    let answeredQuestions = 0
-    let correctQuestions = 0
+    // Build a flat list of all questions with their submission status
+    const allQuestions: Array<{ gameId: string; questionId: string; isAnswered: boolean; isCorrect: boolean }> = []
 
     specs.forEach(spec => {
       if (!spec.source) return
@@ -100,29 +98,51 @@ export default function App() {
       
       if (specData.questions) {
         // MCQSet, OrderingSet, PairMatchSet
-        totalQuestions += specData.questions.length
-        answeredQuestions += gameSubmissions.length
-        correctQuestions += gameSubmissions.filter(q => q.correct).length
+        specData.questions.forEach((q: any) => {
+          const submission = gameSubmissions.find(s => s.questionId === q.id)
+          allQuestions.push({
+            gameId: specData.id,
+            questionId: q.id,
+            isAnswered: !!submission,
+            isCorrect: submission?.correct || false,
+          })
+        })
       } else if (specData.sentences) {
         // FillInTheBlanks
-        totalQuestions += specData.sentences.length
-        answeredQuestions += gameSubmissions.length
-        correctQuestions += gameSubmissions.filter(q => q.correct).length
+        specData.sentences.forEach((s: any) => {
+          const submission = gameSubmissions.find(sub => sub.questionId === s.id)
+          allQuestions.push({
+            gameId: specData.id,
+            questionId: s.id,
+            isAnswered: !!submission,
+            isCorrect: submission?.correct || false,
+          })
+        })
       } else if (specData.activities) {
         // ActivitySet, ClassificationSet
-        totalQuestions += specData.activities.length
-        answeredQuestions += gameSubmissions.length
-        correctQuestions += gameSubmissions.filter(q => q.correct).length
+        specData.activities.forEach((a: any) => {
+          const submission = gameSubmissions.find(sub => sub.questionId === a.id)
+          allQuestions.push({
+            gameId: specData.id,
+            questionId: a.id,
+            isAnswered: !!submission,
+            isCorrect: submission?.correct || false,
+          })
+        })
       }
     })
+
+    const answeredQuestions = allQuestions.filter(q => q.isAnswered).length
+    const correctQuestions = allQuestions.filter(q => q.isAnswered && q.isCorrect).length
 
     return {
       totalGames: allGameIds.length,
       completedGames: completedGames.length,
-      totalQuestions,
+      allQuestions,
+      totalQuestions: allQuestions.length,
       answeredQuestions,
       correctQuestions,
-      percentageComplete: totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0,
+      percentageComplete: allQuestions.length > 0 ? Math.round((answeredQuestions / allQuestions.length) * 100) : 0,
       percentageCorrect: answeredQuestions > 0 ? Math.round((correctQuestions / answeredQuestions) * 100) : 0,
     }
   }, [specs, evaluations, submittedQuestions])
@@ -288,55 +308,35 @@ export default function App() {
               </p>
             </div>
             
-            {/* Overall Progress Tracker */}
+            {/* Overall Progress Tracker - Minimal dots + percentage */}
             <div className="flex items-center gap-3">
-              <div className="rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 px-4 py-2.5">
-                {/* Top row: Label, percentage, and stats inline */}
-                <div className="flex items-center gap-4 mb-2">
-                  <span className="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">Overall Progress</span>
-                  <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{overallProgress.percentageComplete}%</span>
-                  <span className="text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                    {overallProgress.answeredQuestions} / {overallProgress.totalQuestions} questions
-                  </span>
-                  {overallProgress.answeredQuestions > 0 && (
-                    <span className="text-xs text-green-600 dark:text-green-400 font-medium whitespace-nowrap">
-                      {overallProgress.percentageCorrect}% correct
-                    </span>
-                  )}
-                </div>
-                
-                {/* Progress bar */}
+              <div className="rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 px-4 py-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                    <div 
-                      className="bg-indigo-600 dark:bg-indigo-500 h-2 rounded-full transition-all duration-500"
-                      style={{ width: `${overallProgress.percentageComplete}%` }}
-                    ></div>
-                  </div>
-                  
-                  {/* Game stages indicator inline with progress bar */}
+                  {/* Dots for each question */}
                   <div className="flex items-center gap-1">
-                    {specs.map((spec, idx) => {
-                      const specData = spec.source as any
-                      const evaluation = evaluations[specData?.id]
-                      const isComplete = evaluation?.correct
-                      const isCurrent = idx === currentSpecIndex
-                      
+                    {overallProgress.allQuestions.map((question) => {
                       return (
                         <div
-                          key={idx}
+                          key={`${question.gameId}-${question.questionId}`}
                           className={`h-2 w-2 rounded-full transition-all duration-300 ${
-                            isComplete 
-                              ? 'bg-green-500 dark:bg-green-400' 
-                              : isCurrent 
-                              ? 'bg-yellow-500 dark:bg-yellow-400 animate-pulse' 
+                            question.isAnswered
+                              ? question.isCorrect 
+                                ? 'bg-green-500 dark:bg-green-400' 
+                                : 'bg-red-500 dark:bg-red-400'
                               : 'bg-slate-300 dark:bg-slate-600'
                           }`}
-                          title={specData?.title || `Game ${idx + 1}`}
+                          title={`${question.gameId} - ${question.questionId}: ${question.isAnswered ? (question.isCorrect ? 'Correct' : 'Incorrect') : 'Not answered'}`}
                         />
                       )
                     })}
                   </div>
+                  
+                  {/* Percentage correct */}
+                  {overallProgress.answeredQuestions > 0 && (
+                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                      {overallProgress.percentageCorrect}%
+                    </span>
+                  )}
                 </div>
               </div>
               
