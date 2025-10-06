@@ -10,6 +10,11 @@
   "distractorsRight": ["Power", "Work"],
   "metadata": {
     "subject": "Physics",
-    "difficulty": 2
+    "difficulty": 2,
+    "assessmentStandard": "AS92005",
+    "omis": [
+      "definition_recall",
+      "conceptual_understanding"
+    ]
   }
 }

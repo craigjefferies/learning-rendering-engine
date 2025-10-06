@@ -14,6 +14,11 @@
   "shuffle": true,
   "metadata": {
     "subject": "Physics",
-    "difficulty": 2
+    "difficulty": 2,
+    "assessmentStandard": "AS92005",
+    "omis": [
+      "sequence_understanding",
+      "scientific_knowledge"
+    ]
   }
 }

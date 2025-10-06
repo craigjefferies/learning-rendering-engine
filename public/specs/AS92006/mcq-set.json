@@ -1,0 +1,53 @@
+{
+  "id": "set-as92006-interfaces",
+  "type": "mcq-set",
+  "title": "Interface Concepts",
+  "description": "A collection of questions assessing understanding of interface purposes and usability principles",
+  "questions": [
+    {
+      "id": "as92006-omi-purpose-001",
+      "type": "mcq",
+      "title": "Interface Purpose",
+      "prompt": "A student uses the school's online portal to check their timetable and see their NCEA results. What is the main purpose of this interface?",
+      "options": [
+        { "id": "A", "text": "To allow students to access and view their personal academic information." },
+        { "id": "B", "text": "To make the school's website look modern and professional." },
+        { "id": "C", "text": "To reduce the number of teachers in the school." },
+        { "id": "D", "text": "To provide a platform for downloading software updates." }
+      ],
+      "correctOptionId": "A",
+      "explanation": "The correct answer directly describes what the user achieves with the interface, which is the core of defining its purpose. Other options are incorrect or secondary effects.",
+      "omiMapping": ["interface_purpose"]
+    },
+    {
+      "id": "as92006-omi-identify-principle-001",
+      "type": "mcq",
+      "title": "Identify Usability Principle",
+      "prompt": "On a pizza delivery website, the 'Checkout' button is always green and located in the top-right corner on every page. Which usability principle does this best demonstrate?",
+      "options": [
+        { "id": "A", "text": "Error prevention" },
+        { "id": "B", "text": "Aesthetic and minimalist design" },
+        { "id": "C", "text": "Internal consistency" },
+        { "id": "D", "text": "Help and documentation" }
+      ],
+      "correctOptionId": "C",
+      "explanation": "Using the same design and placement for a specific function (like the Checkout button) throughout a single website is a clear example of internal consistency, which helps users learn the interface quickly.",
+      "omiMapping": ["identify_usability_principles"]
+    },
+    {
+      "id": "as92006-omi-explain-principle-001",
+      "type": "mcq",
+      "title": "Explain Usability Principle",
+      "prompt": "A banking app shows a confirmation screen before transferring money, stating 'You are about to transfer $500 to John Smith. Is this correct?' Why is this confirmation important?",
+      "options": [
+        { "id": "A", "text": "It makes the app look more professional" },
+        { "id": "B", "text": "It prevents users from making costly errors" },
+        { "id": "C", "text": "It slows down the transaction process" },
+        { "id": "D", "text": "It reduces the amount of text on screen" }
+      ],
+      "correctOptionId": "B",
+      "explanation": "Confirmation screens are a key example of error prevention - they give users a chance to review and correct their actions before committing to potentially irreversible or costly operations.",
+      "omiMapping": ["explain_usability_principles", "interface_purpose"]
+    }
+  ]
+}

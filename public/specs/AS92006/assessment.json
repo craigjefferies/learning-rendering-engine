@@ -1,0 +1,86 @@
+{
+  "id": "AS92006",
+  "standard": "AS92006",
+  "title": "User Interfaces & Usability",
+  "fullTitle": "AS92006: User Interfaces & Usability",
+  "subject": "Digital Technologies",
+  "level": 1,
+  "credits": 4,
+  "description": "Demonstrate understanding of human computer interaction",
+  "learningOutcomes": {
+    "achieved": "Demonstrate understanding of human computer interaction",
+    "merit": "Demonstrate in-depth understanding of human computer interaction",
+    "excellence": "Demonstrate comprehensive understanding of human computer interaction"
+  },
+  "omiList": [
+    {
+      "id": "interface_purpose",
+      "name": "Interface Purpose",
+      "description": "Identify and describe the purpose of user interfaces"
+    },
+    {
+      "id": "identify_usability_principles",
+      "name": "Identify Usability Principles",
+      "description": "Identify usability heuristics and principles in interface designs"
+    },
+    {
+      "id": "explain_usability_principles",
+      "name": "Explain Usability Principles",
+      "description": "Explain how usability principles improve user experience"
+    },
+    {
+      "id": "evaluate_interface_design",
+      "name": "Evaluate Interface Design",
+      "description": "Evaluate interface designs against usability criteria"
+    },
+    {
+      "id": "apply_design_principles",
+      "name": "Apply Design Principles",
+      "description": "Apply design principles to create effective interfaces"
+    }
+  ],
+  "gameSets": [
+    {
+      "id": "mcq-set",
+      "title": "Interface Concepts",
+      "type": "mcq-set",
+      "path": "/specs/AS92006/mcq-set.json",
+      "description": "Multiple choice questions assessing understanding of interface purposes and usability principles"
+    },
+    {
+      "id": "pairmatch-set",
+      "title": "Usability Principles",
+      "type": "pairmatch-set",
+      "path": "/specs/AS92006/pairmatch-set.json",
+      "description": "Match usability principles with their definitions and examples"
+    },
+    {
+      "id": "ordering-set",
+      "title": "User Workflows",
+      "type": "ordering-set",
+      "path": "/specs/AS92006/ordering-set.json",
+      "description": "Arrange user workflow steps in the correct sequence"
+    },
+    {
+      "id": "fillblanks-set",
+      "title": "Usability Heuristics",
+      "type": "fillblanks-set",
+      "path": "/specs/AS92006/fillblanks-set.json",
+      "description": "Complete sentences about usability heuristics and design principles"
+    },
+    {
+      "id": "classification-set",
+      "title": "Usability Principles Classification",
+      "type": "classification-set",
+      "path": "/specs/AS92006/classification-set.json",
+      "description": "Classify UI examples into appropriate usability categories"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-10-07",
+    "author": "Learning Engine Team",
+    "totalQuestions": 0,
+    "estimatedDuration": "45-60 minutes"
+  }
+}

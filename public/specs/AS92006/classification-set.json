@@ -1,0 +1,60 @@
+{
+  "id": "classification-usability-principles",
+  "type": "classification-set",
+  "title": "Usability Principles Classification",
+  "description": "Drag each interface scenario into the correct usability principle category.",
+  "activities": [
+    {
+      "id": "usability-principles-classification",
+      "type": "classification",
+      "title": "User Interface Examples",
+      "prompt": "Classify each example according to the usability principle it demonstrates:",
+      "categories": [
+        {
+          "id": "error-prevention",
+          "name": "Error Prevention"
+        },
+        {
+          "id": "feedback",
+          "name": "Feedback"
+        },
+        {
+          "id": "consistency",
+          "name": "Consistency"
+        },
+        {
+          "id": "minimalism",
+          "name": "Minimalism & Simplicity"
+        }
+      ],
+      "items": [
+        {
+          "id": "item1",
+          "text": "A booking website grays out the 'Confirm' button until all required fields are filled in.",
+          "correctCategoryId": "error-prevention"
+        },
+        {
+          "id": "item2",
+          "text": "After clicking 'Save', a green message appears saying 'Document saved successfully'.",
+          "correctCategoryId": "feedback"
+        },
+        {
+          "id": "item3",
+          "text": "All buttons across the application use the same blue color and rounded corners.",
+          "correctCategoryId": "consistency"
+        },
+        {
+          "id": "item4",
+          "text": "The homepage displays only essential options: Login, Sign Up, and Learn More.",
+          "correctCategoryId": "minimalism"
+        },
+        {
+          "id": "item5",
+          "text": "When entering a password, a strength meter shows if it's weak, medium, or strong in real-time.",
+          "correctCategoryId": "feedback"
+        }
+      ],
+      "omiMapping": ["2.2.1", "2.2.2", "2.3.1"]
+    }
+  ]
+}

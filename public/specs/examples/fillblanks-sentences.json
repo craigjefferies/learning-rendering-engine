@@ -1,0 +1,44 @@
+{
+  "id": "fill-blanks-001",
+  "type": "fill-in-the-blanks",
+  "title": "Complete the Physics Sentences",
+  "prompt": "Drag the correct term into each blank space to complete the sentences about electricity and circuits.",
+  "sentences": [
+    { 
+      "id": "s1", 
+      "text": ["Electric current is measured in ", " and represents the flow of charge."], 
+      "blank_answer": "amperes" 
+    },
+    { 
+      "id": "s2", 
+      "text": ["The opposition to current flow in a circuit is called ", "."], 
+      "blank_answer": "resistance" 
+    },
+    { 
+      "id": "s3", 
+      "text": ["Ohm's Law states that voltage equals current times ", "."], 
+      "blank_answer": "resistance" 
+    },
+    { 
+      "id": "s4", 
+      "text": ["A ", " is used to measure the potential difference between two points."], 
+      "blank_answer": "voltmeter" 
+    }
+  ],
+  "word_bank": [
+    "amperes",
+    "resistance",
+    "voltmeter",
+    "capacitance",
+    "inductance",
+    "watts"
+  ],
+  "metadata": {
+    "subject": "Physics",
+    "difficulty": 2,
+    "omis": [
+      "electrical_concepts",
+      "circuit_knowledge"
+    ]
+  }
+}

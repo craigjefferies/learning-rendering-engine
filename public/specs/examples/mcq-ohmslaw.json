@@ -13,6 +13,12 @@
   "explanation": "I = V/R -> doubling R halves I.",
   "metadata": {
     "subject": "Physics",
-    "difficulty": 2
+    "difficulty": 2,
+    "assessmentStandard": "AS92005",
+    "omis": [
+      "explain_relationships",
+      "apply_concepts",
+      "mathematical_reasoning"
+    ]
   }
 }

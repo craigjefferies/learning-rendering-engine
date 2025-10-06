@@ -1,12 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { gameSpecSchema } from '../domain/schema'
-import type { AnswerPayload, GameSpec, MCQAnswer, OrderingAnswer, PairMatchAnswer } from '../domain/schema'
+import type { AnswerPayload, GameSpec, MCQAnswer, MCQSetAnswer, OrderingAnswer, OrderingSetAnswer, PairMatchAnswer, PairMatchSetAnswer, FillInTheBlanksAnswer, ActivitySetAnswer, ClassificationSetAnswer } from '../domain/schema'
 import type { EvaluationResult, RendererEventListener } from '../domain/events'
 import { scoreGame } from '../domain/scoring'
 import { useRendererStore } from '../lib/store'
 import { MCQ } from './games/MCQ'
+import { MCQSet } from './games/MCQSet'
 import { Ordering } from './games/Ordering'
+import { OrderingSet } from './games/OrderingSet'
 import { PairMatch } from './games/PairMatch'
+import { PairMatchSet } from './games/PairMatchSet'
+import { FillInTheBlanks } from './games/FillInTheBlanks'
+import { ActivitySet } from './games/ActivitySet'
+import { ClassificationSet } from './games/ClassificationSet'
+import { OMIProgress } from './OMIProgress'
 
 interface GameRendererProps {
   spec: unknown
@@ -57,19 +64,17 @@ export function GameRenderer({ spec, onEvent }: GameRendererProps) {
 
   const validatedSpec = parsed.data
   const specId = validatedSpec.id
-  const timeLimit = validatedSpec.timeLimitSec
+  const timeLimit = 'timeLimitSec' in validatedSpec ? validatedSpec.timeLimitSec : undefined
 
-  const { setAnswer, setEvaluation, clearAnswer, clearEvaluation, initTimer, tickTimer, stopTimer, resetGame } =
-    useRendererStore((state) => ({
-      setAnswer: state.setAnswer,
-      setEvaluation: state.setEvaluation,
-      clearAnswer: state.clearAnswer,
-      clearEvaluation: state.clearEvaluation,
-      initTimer: state.initTimer,
-      tickTimer: state.tickTimer,
-      stopTimer: state.stopTimer,
-      resetGame: state.resetGame,
-    }))
+  const setAnswer = useRendererStore((state) => state.setAnswer)
+  const setEvaluation = useRendererStore((state) => state.setEvaluation)
+  const clearAnswer = useRendererStore((state) => state.clearAnswer)
+  const clearEvaluation = useRendererStore((state) => state.clearEvaluation)
+  const initTimer = useRendererStore((state) => state.initTimer)
+  const tickTimer = useRendererStore((state) => state.tickTimer)
+  const stopTimer = useRendererStore((state) => state.stopTimer)
+  const resetGame = useRendererStore((state) => state.resetGame)
+  const recordOMIEvidence = useRendererStore((state) => state.recordOMIEvidence)
 
   const answerEnvelope = useRendererStore((state) => state.answers[specId])
   const evaluation = useRendererStore((state) => state.evaluations[specId])
@@ -131,9 +136,18 @@ export function GameRenderer({ spec, onEvent }: GameRendererProps) {
       if (result) {
         setEvaluation(specId, result)
         stopTimer(specId)
+        
+        // Record OMI evidence if present
+        if (result.omiEvidence && result.omiEvidence.length > 0) {
+          recordOMIEvidence(result.omiEvidence)
+          onEvent?.({ kind: 'omi.evidence', gameId: specId, evidence: result.omiEvidence })
+        }
+        
+        // Emit game completion event
+        onEvent?.({ kind: 'game.completed', gameId: specId, score: result.score })
       }
     },
-    [validatedSpec, specId, setAnswer, onEvent, setEvaluation, stopTimer],
+    [validatedSpec, specId, setAnswer, onEvent, setEvaluation, stopTimer, recordOMIEvidence],
   )
 
   const handleReset = useCallback(() => {
@@ -145,37 +159,62 @@ export function GameRenderer({ spec, onEvent }: GameRendererProps) {
     (payload: AnswerPayload['payload']) => {
       const envelope: AnswerPayload = { type: validatedSpec.type, payload } as AnswerPayload
       setAnswer(specId, envelope)
-      if (evaluation) {
-        clearEvaluation(specId)
-      }
+      // Clear evaluation if it exists
+      clearEvaluation(specId)
     },
-    [validatedSpec, specId, setAnswer, evaluation, clearEvaluation],
+    [validatedSpec, specId, setAnswer, clearEvaluation],
   )
 
   const currentAnswer = answerEnvelope && answerEnvelope.type === validatedSpec.type ? answerEnvelope.payload : undefined
 
   return (
-    <section className="w-full max-w-3xl space-y-6 rounded-xl border border-slate-200 bg-slate-50 p-6 shadow-md dark:border-slate-700 dark:bg-slate-900">
-      <header className="space-y-2">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            {validatedSpec.title && <h1 className="text-2xl font-semibold">{validatedSpec.title}</h1>}
-            {validatedSpec.metadata?.subject && (
-              <p className="text-sm text-slate-500 dark:text-slate-300">{validatedSpec.metadata.subject}</p>
-            )}
-          </div>
-          {timeLimit && (
-            <div className="flex items-center gap-2 rounded-md border border-indigo-500 px-3 py-1 text-sm font-medium text-indigo-600 dark:border-indigo-400 dark:text-indigo-300">
-              <span role="img" aria-label="Timer">
-                ⏱
-              </span>
-              <span>{timer?.remainingSec ?? timeLimit}s</span>
+    <section className="w-full space-y-6">
+      {/* Clean Header */}
+      <div className="flex items-start justify-between border-b border-slate-200 pb-4 dark:border-slate-800">
+        <div className="flex-1">
+          {validatedSpec.title && (
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              {validatedSpec.title}
+            </h2>
+          )}
+          {validatedSpec.metadata?.subject && (
+            <div className="mt-2 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+              <span>{validatedSpec.metadata.subject}</span>
+              {validatedSpec.metadata.difficulty && (
+                <>
+                  <span>•</span>
+                  <span>Level {validatedSpec.metadata.difficulty}</span>
+                </>
+              )}
             </div>
           )}
         </div>
-      </header>
+        {timeLimit && (
+          <div className={`
+            flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold
+            ${
+              timer && timer.remainingSec <= 10
+                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+            }
+          `}>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{timer?.remainingSec ?? timeLimit}s</span>
+          </div>
+        )}
+      </div>
 
-      <div>
+      {/* OMI Progress Display */}
+      {validatedSpec.metadata?.omis && 
+       validatedSpec.metadata.omis.length > 0 && 
+       !['mcq-set', 'ordering-set', 'pair-match-set', 'activity-set', 'classification-set'].includes(validatedSpec.type) && (
+        <OMIProgress spec={validatedSpec} />
+      )}
+
+      {/* Game Content */}
+      <div className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
         {renderGameComponent({
           spec: validatedSpec,
           answer: currentAnswer,
@@ -214,6 +253,18 @@ function renderGameComponent({ spec, answer, evaluation, disabled, onAnswerChang
           onReset={onReset}
         />
       )
+    case 'mcq-set':
+      return (
+        <MCQSet
+          spec={spec}
+          answer={answer as MCQSetAnswer | undefined}
+          evaluation={evaluation}
+          disabled={disabled}
+          onAnswerChange={(mcqSetAnswer) => onAnswerChange(mcqSetAnswer)}
+          onSubmit={(mcqSetAnswer) => onSubmit(mcqSetAnswer)}
+          onReset={onReset}
+        />
+      )
     case 'ordering':
       return (
         <Ordering
@@ -226,6 +277,18 @@ function renderGameComponent({ spec, answer, evaluation, disabled, onAnswerChang
           onReset={onReset}
         />
       )
+    case 'ordering-set':
+      return (
+        <OrderingSet
+          spec={spec}
+          answer={answer as OrderingSetAnswer | undefined}
+          evaluation={evaluation}
+          disabled={disabled}
+          onAnswerChange={(orderingSetAnswer) => onAnswerChange(orderingSetAnswer)}
+          onSubmit={(orderingSetAnswer) => onSubmit(orderingSetAnswer)}
+          onReset={onReset}
+        />
+      )
     case 'pair-match':
       return (
         <PairMatch
@@ -235,6 +298,54 @@ function renderGameComponent({ spec, answer, evaluation, disabled, onAnswerChang
           disabled={disabled}
           onAnswerChange={(pairMatchAnswer) => onAnswerChange(pairMatchAnswer)}
           onSubmit={(pairMatchAnswer) => onSubmit(pairMatchAnswer)}
+          onReset={onReset}
+        />
+      )
+    case 'pair-match-set':
+      return (
+        <PairMatchSet
+          spec={spec}
+          answer={answer as PairMatchSetAnswer | undefined}
+          evaluation={evaluation}
+          disabled={disabled}
+          onAnswerChange={(pairMatchSetAnswer) => onAnswerChange(pairMatchSetAnswer)}
+          onSubmit={(pairMatchSetAnswer) => onSubmit(pairMatchSetAnswer)}
+          onReset={onReset}
+        />
+      )
+    case 'fill-in-the-blanks':
+      return (
+        <FillInTheBlanks
+          spec={spec}
+          answer={answer as FillInTheBlanksAnswer | undefined}
+          evaluation={evaluation}
+          disabled={disabled}
+          onAnswerChange={(fillAnswer) => onAnswerChange(fillAnswer)}
+          onSubmit={(fillAnswer) => onSubmit(fillAnswer)}
+          onReset={onReset}
+        />
+      )
+    case 'activity-set':
+      return (
+        <ActivitySet
+          spec={spec}
+          answer={answer as ActivitySetAnswer | undefined}
+          evaluation={evaluation}
+          disabled={disabled}
+          onAnswerChange={(activitySetAnswer) => onAnswerChange(activitySetAnswer)}
+          onSubmit={(activitySetAnswer) => onSubmit(activitySetAnswer)}
+          onReset={onReset}
+        />
+      )
+    case 'classification-set':
+      return (
+        <ClassificationSet
+          spec={spec}
+          answer={answer as ClassificationSetAnswer | undefined}
+          evaluation={evaluation}
+          disabled={disabled}
+          onAnswerChange={(classificationSetAnswer) => onAnswerChange(classificationSetAnswer)}
+          onSubmit={(classificationSetAnswer) => onSubmit(classificationSetAnswer)}
           onReset={onReset}
         />
       )

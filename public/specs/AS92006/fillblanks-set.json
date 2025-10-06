@@ -1,0 +1,56 @@
+{
+  "id": "as92006-fill-blanks-001",
+  "type": "fill-in-the-blanks",
+  "title": "Usability Heuristics",
+  "prompt": "Drag the correct term into each blank space to complete the sentences.",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": [
+        "Showing a progress bar when uploading a file is a good example of providing ",
+        " to the user, so they know what's happening."
+      ],
+      "blank_answer": "visibility of system status"
+    },
+    {
+      "id": "s2",
+      "text": [
+        "An interface that uses a trash can icon for deleting items ",
+        " by using a concept users already understand."
+      ],
+      "blank_answer": "matches with the real world"
+    },
+    {
+      "id": "s3",
+      "text": [
+        "A clear 'Undo' button gives the user ",
+        ", allowing them to easily reverse an accidental action."
+      ],
+      "blank_answer": "control and freedom"
+    },
+    {
+      "id": "s4",
+      "text": [
+        "When an error message says 'Error 52xAB' instead of 'Incorrect password, please try again', it fails to help the user ",
+        "."
+      ],
+      "blank_answer": "recover from errors"
+    }
+  ],
+  "word_bank": [
+    "visibility of system status",
+    "matches with the real world",
+    "control and freedom",
+    "recover from errors",
+    "minimalist design",
+    "external consistency"
+  ],
+  "metadata": {
+    "subject": "Digital Technologies",
+    "assessmentStandard": "AS92006",
+    "difficulty": 2,
+    "omis": [
+      "identify_usability_principles"
+    ]
+  }
+}

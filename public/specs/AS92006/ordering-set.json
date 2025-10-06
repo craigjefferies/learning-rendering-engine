@@ -1,0 +1,38 @@
+{
+  "id": "as92006-workflow-ordering-set",
+  "type": "ordering-set",
+  "title": "User Workflows",
+  "description": "Arrange steps in the correct order for common digital interface workflows.",
+  "questions": [
+    {
+      "id": "as92006-order-workflow-001",
+      "type": "ordering",
+      "title": "Steps to Buy a Product Online",
+      "prompt": "Arrange these steps in the correct order for a typical online shopping experience, from finding a product to completing the purchase.",
+      "items": [
+        "Search for the product using the search bar.",
+        "Add the desired product to the shopping cart.",
+        "Go to the checkout page.",
+        "Enter shipping and payment details.",
+        "Confirm the order and receive a confirmation message."
+      ],
+      "shuffle": true,
+      "omiMapping": ["interface_purpose", "workflow_understanding"]
+    },
+    {
+      "id": "as92006-order-workflow-002",
+      "type": "ordering",
+      "title": "Steps to Book a School Meeting Room",
+      "prompt": "Arrange these steps in the correct order for booking a meeting room using the school's online system.",
+      "items": [
+        "Navigate to the 'Room Booking' section of the portal.",
+        "Select the desired date and time for the meeting.",
+        "Choose an available room from the list.",
+        "Fill in the reason for the booking.",
+        "Submit the booking request and check for a confirmation notice."
+      ],
+      "shuffle": true,
+      "omiMapping": ["interface_purpose", "workflow_understanding"]
+    }
+  ]
+}
