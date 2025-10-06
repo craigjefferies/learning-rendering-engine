@@ -1,0 +1,18 @@
+{
+  "id": "g-001",
+  "type": "mcq",
+  "title": "Ohm's Law",
+  "prompt": "If V stays constant and R doubles, what happens to I?",
+  "options": [
+    { "id": "A", "text": "I doubles" },
+    { "id": "B", "text": "I halves" },
+    { "id": "C", "text": "I stays the same" },
+    { "id": "D", "text": "V halves" }
+  ],
+  "correctOptionId": "B",
+  "explanation": "I = V/R -> doubling R halves I.",
+  "metadata": {
+    "subject": "Physics",
+    "difficulty": 2
+  }
+}

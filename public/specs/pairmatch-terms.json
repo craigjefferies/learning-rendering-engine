@@ -1,0 +1,15 @@
+{
+  "id": "g-020",
+  "type": "pair-match",
+  "title": "Terms to Definitions",
+  "pairs": [
+    { "left": "Voltage", "right": "Energy per charge" },
+    { "left": "Current", "right": "Charge per second" },
+    { "left": "Resistance", "right": "Opposition to current" }
+  ],
+  "distractorsRight": ["Power", "Work"],
+  "metadata": {
+    "subject": "Physics",
+    "difficulty": 2
+  }
+}
