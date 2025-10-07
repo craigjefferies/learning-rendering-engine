@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { gameSpecSchema } from '../domain/schema'
-import type { AnswerPayload, GameSpec, MCQAnswer, MCQSetAnswer, OrderingAnswer, OrderingSetAnswer, PairMatchAnswer, PairMatchSetAnswer, FillInTheBlanksAnswer, ActivitySetAnswer, ClassificationSetAnswer } from '../domain/schema'
+import type { AnswerPayload, GameSpec, MCQAnswer, MCQSetAnswer, OrderingAnswer, OrderingSetAnswer, PairMatchAnswer, PairMatchSetAnswer, FillInTheBlanksAnswer, ClassificationSetAnswer } from '../domain/schema'
 import type { EvaluationResult, RendererEventListener } from '../domain/events'
 import { scoreGame } from '../domain/scoring'
 import { useRendererStore } from '../lib/store'
@@ -11,7 +11,6 @@ import { OrderingSet } from './games/OrderingSet'
 import { PairMatch } from './games/PairMatch'
 import { PairMatchSet } from './games/PairMatchSet'
 import { FillInTheBlanks } from './games/FillInTheBlanks'
-import { ActivitySet } from './games/ActivitySet'
 import { ClassificationSet } from './games/ClassificationSet'
 import { OMIProgress } from './OMIProgress'
 
@@ -209,7 +208,7 @@ export function GameRenderer({ spec, onEvent }: GameRendererProps) {
       {/* OMI Progress Display */}
       {validatedSpec.metadata?.omis && 
        validatedSpec.metadata.omis.length > 0 && 
-       !['mcq-set', 'ordering-set', 'pair-match-set', 'activity-set', 'classification-set'].includes(validatedSpec.type) && (
+       !['mcq-set', 'ordering-set', 'pair-match-set', 'classification-set'].includes(validatedSpec.type) && (
         <OMIProgress spec={validatedSpec} />
       )}
 
@@ -322,18 +321,6 @@ function renderGameComponent({ spec, answer, evaluation, disabled, onAnswerChang
           disabled={disabled}
           onAnswerChange={(fillAnswer) => onAnswerChange(fillAnswer)}
           onSubmit={(fillAnswer) => onSubmit(fillAnswer)}
-          onReset={onReset}
-        />
-      )
-    case 'activity-set':
-      return (
-        <ActivitySet
-          spec={spec}
-          answer={answer as ActivitySetAnswer | undefined}
-          evaluation={evaluation}
-          disabled={disabled}
-          onAnswerChange={(activitySetAnswer) => onAnswerChange(activitySetAnswer)}
-          onSubmit={(activitySetAnswer) => onSubmit(activitySetAnswer)}
           onReset={onReset}
         />
       )

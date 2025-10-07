@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import type { EvaluationResult } from '../../domain/events'
 import type { PairMatchSetSpec, PairMatchSetAnswer } from '../../domain/schema'
 import { OMIProgress } from '../OMIProgress'
+import { useRendererStore } from '../../lib/store'
 
 interface PairMatchSetProps {
   spec: PairMatchSetSpec
@@ -26,6 +27,7 @@ export function PairMatchSet({
   const [answers, setAnswers] = useState<Record<string, Array<{ left: string; right: string }>>>(answer?.answers || {})
   const [showFeedback, setShowFeedback] = useState(false)
   const [fadeIn, setFadeIn] = useState(true)
+  const markQuestionSubmitted = useRendererStore((state) => state.markQuestionSubmitted)
 
   // For the current question's matching state
   const [matches, setMatches] = useState<Map<string, string>>(new Map())
@@ -122,6 +124,8 @@ export function PairMatchSet({
       })
       
       if (allCorrect) {
+        // Mark question as submitted before advancing
+        markQuestionSubmitted(spec.id, currentQuestion.id, true)
         setTimeout(() => {
           setCurrentQuestionIndex(currentQuestionIndex + 1)
         }, 1500) // Wait 1.5 seconds to show all green checkmarks before advancing
@@ -148,6 +152,14 @@ export function PairMatchSet({
 
   const handleSubmit = () => {
     if (!allAnswered) return
+    
+    // Mark the last question as submitted
+    const allCorrect = currentQuestion.pairs.every(pair => {
+      const selectedRight = matches.get(pair.left)
+      return selectedRight === pair.right
+    })
+    markQuestionSubmitted(spec.id, currentQuestion.id, allCorrect)
+    
     onSubmit({ answers })
   }
 

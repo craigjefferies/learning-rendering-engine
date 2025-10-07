@@ -1,64 +1,54 @@
 {
-  "id": "as92006-usability-pairmatch-set",
+  "id": "as92006-usability-pairmatch-set-expanded",
   "type": "pair-match-set",
-  "title": "Usability Principles",
-  "description": "Match usability heuristics and concepts to their descriptions and meanings.",
+  "title": "Usability Principles and Concepts",
+  "description": "Match each usability term to its correct description.",
   "questions": [
     {
-      "id": "as92006-match-heuristics-001",
+      "id": "as92006-match-all-concepts-001",
       "type": "pair-match",
-      "title": "Match Usability Heuristics to their Description",
+      "title": "Comprehensive Usability Match-Up",
       "pairs": [
         { 
           "left": "Visibility of system status", 
           "right": "Keeping the user informed about what is happening (e.g., a progress bar)." 
         },
         { 
+          "left": "Match with the real world", 
+          "right": "Using familiar language and concepts, like a 'shopping cart' icon on an e-commerce site."
+        },
+        { 
           "left": "User control and freedom", 
           "right": "Providing an 'undo' button or a clear 'exit' to let users easily fix mistakes." 
         },
-        { 
-          "left": "Recognition rather than recall", 
-          "right": "Showing options in a menu instead of making the user remember commands." 
+        {
+          "left": "External consistency", 
+          "right": "An interface works in a way that feels familiar based on how other common apps work." 
         },
         { 
           "left": "Error prevention", 
-          "right": "Designing the system to make mistakes less likely, like disabling a button until a form is complete." 
-        }
-      ],
-      "distractorsRight": [
-        "Making the interface pretty with lots of colours and fonts.",
-        "Using technical jargon to sound more professional."
-      ],
-      "omiMapping": ["identify_usability_principles"]
-    },
-    {
-      "id": "as92006-match-concepts-001",
-      "type": "pair-match",
-      "title": "Match Usability Concepts to their Meanings",
-      "pairs": [
-        { 
-          "left": "Internal consistency", 
-          "right": "When similar elements look and act the same way within a single website or app." 
+          "right": "Designing to make mistakes less likely, like disabling a button until a form is complete." 
+        },
+        {
+          "left": "Aesthetic and minimalist design",
+          "right": "Avoiding clutter by only showing relevant information needed for the current task."
+        },
+        {
+          "left": "Help users recover from errors",
+          "right": "Providing clear, plain-language messages that explain what went wrong and how to fix it."
         },
         { 
           "left": "Accessibility", 
           "right": "Designing an interface so it can be used by people with disabilities, such as screen-reader users." 
-        },
-        { 
-          "left": "Correct te reo Māori", 
-          "right": "Ensuring words like 'whānau' are displayed with correct spelling and macrons in the interface." 
-        },
-        { 
-          "left": "External consistency", 
-          "right": "When an interface works in a way that feels familiar to users based on how other apps work." 
         }
       ],
       "distractorsRight": [
-        "Showing a progress bar when a file is uploading.",
-        "Making sure the app is available in many different countries."
+        "Making the interface pretty with lots of colours and fonts.",
+        "Using technical jargon to sound more professional.",
+        "Ensuring the app is available in many different countries.",
+        "Providing keyboard shortcuts for advanced users only."
       ],
-      "omiMapping": ["identify_usability_principles", "apply_usability_concepts"]
+      "omiMapping": ["identify_usability_principles"]
     }
   ]
 }

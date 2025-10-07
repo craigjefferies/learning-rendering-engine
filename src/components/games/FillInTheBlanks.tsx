@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
 import type { EvaluationResult } from '../../domain/events'
 import type { FillInTheBlanksSpec, FillInTheBlanksAnswer } from '../../domain/schema'
+import { useRendererStore } from '../../lib/store'
 
 interface FillInTheBlanksProps {
   spec: FillInTheBlanksSpec
@@ -26,12 +27,29 @@ export function FillInTheBlanks({
   const [answers, setAnswers] = useState<Record<string, string>>(answer?.answers || {})
   const [draggedWord, setDraggedWord] = useState<string | null>(null)
   const [showFeedback, setShowFeedback] = useState(false)
+  const [shuffledWordBank, setShuffledWordBank] = useState<string[]>([])
+  const markQuestionSubmitted = useRendererStore((state) => state.markQuestionSubmitted)
 
   const currentSentence = spec.sentences[currentSentenceIndex]
   const totalSentences = spec.sentences.length
   const isLastSentence = currentSentenceIndex === totalSentences - 1
   const isFirstSentence = currentSentenceIndex === 0
   const allAnswered = spec.sentences.every((s) => answers[s.id])
+
+  // Shuffle array using Fisher-Yates algorithm
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+  }
+
+  // Shuffle word bank on mount
+  useEffect(() => {
+    setShuffledWordBank(shuffleArray(spec.word_bank))
+  }, [spec.word_bank])
 
   useEffect(() => {
     if (evaluation) {
@@ -81,6 +99,11 @@ export function FillInTheBlanks({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!allAnswered) return
+    
+    // Mark the last sentence as submitted
+    const isCorrect = answers[currentSentence.id] === currentSentence.blank_answer
+    markQuestionSubmitted(spec.id, currentSentence.id, isCorrect)
+    
     onSubmit({ answers })
   }
 
@@ -93,6 +116,11 @@ export function FillInTheBlanks({
 
   const handleNext = () => {
     if (!isLastSentence) {
+      // Mark current sentence as submitted before moving to next
+      const isCorrect = answers[currentSentence.id] === currentSentence.blank_answer
+      if (answers[currentSentence.id]) {
+        markQuestionSubmitted(spec.id, currentSentence.id, isCorrect)
+      }
       setCurrentSentenceIndex((prev) => prev + 1)
     }
   }
@@ -192,7 +220,7 @@ export function FillInTheBlanks({
             Word Bank
           </h3>
           <div className="flex flex-wrap gap-3">
-            {spec.word_bank.map((word) => {
+            {shuffledWordBank.map((word) => {
               const isUsed = usedWords.has(word)
               return (
                 <div

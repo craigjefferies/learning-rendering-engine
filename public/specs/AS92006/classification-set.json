@@ -1,11 +1,11 @@
 {
-  "id": "classification-usability-principles",
+  "id": "classification-usability-principles-expanded",
   "type": "classification-set",
-  "title": "Usability Principles Classification",
+  "title": "Usability Principles Classification (Expanded)",
   "description": "Drag each interface scenario into the correct usability principle category.",
   "activities": [
     {
-      "id": "usability-principles-classification",
+      "id": "usability-principles-classification-expanded",
       "type": "classification",
       "title": "User Interface Examples",
       "prompt": "Classify each example according to the usability principle it demonstrates:",
@@ -16,7 +16,7 @@
         },
         {
           "id": "feedback",
-          "name": "Feedback"
+          "name": "Feedback / System Status"
         },
         {
           "id": "consistency",
@@ -25,6 +25,18 @@
         {
           "id": "minimalism",
           "name": "Minimalism & Simplicity"
+        },
+        {
+          "id": "user-control",
+          "name": "User Control & Freedom"
+        },
+        {
+          "id": "recognition",
+          "name": "Recognition vs. Recall"
+        },
+        {
+          "id": "accessibility",
+          "name": "Accessibility"
         }
       ],
       "items": [
@@ -52,6 +64,26 @@
           "id": "item5",
           "text": "When entering a password, a strength meter shows if it's weak, medium, or strong in real-time.",
           "correctCategoryId": "feedback"
+        },
+        {
+          "id": "item6",
+          "text": "After accidentally deleting a photo, a 'Restore' button appears for 30 seconds.",
+          "correctCategoryId": "user-control"
+        },
+        {
+          "id": "item7",
+          "text": "A form provides a dropdown list of countries instead of making the user type one.",
+          "correctCategoryId": "recognition"
+        },
+        {
+          "id": "item8",
+          "text": "The website uses high-contrast text and provides 'alt text' for all images for screen readers.",
+          "correctCategoryId": "accessibility"
+        },
+        {
+          "id": "item9",
+          "text": "A government website correctly uses macrons for words like 'kōrero' and 'whānau' in all its menus and headings.",
+          "correctCategoryId": "consistency"
         }
       ],
       "omiMapping": ["2.2.1", "2.2.2", "2.3.1"]

@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import type { EvaluationResult } from '../../domain/events'
 import type { ClassificationSetSpec, ClassificationSetAnswer } from '../../domain/schema'
 import { OMIProgress } from '../OMIProgress'
+import { useRendererStore } from '../../lib/store'
 
 interface ClassificationSetProps {
   spec: ClassificationSetSpec
@@ -27,6 +28,7 @@ export function ClassificationSet({
   const [answers, setAnswers] = useState<Record<string, Record<string, string>>>(answer?.answers || {})
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
   const [showFeedback, setShowFeedback] = useState(false)
+  const markQuestionSubmitted = useRendererStore((state) => state.markQuestionSubmitted)
 
   const currentActivity = spec.activities[currentActivityIndex]
   const totalActivities = spec.activities.length
@@ -84,6 +86,18 @@ export function ClassificationSet({
 
   const handleNext = () => {
     if (!isLastActivity) {
+      // Check if current activity is correct and mark it
+      const activityAnswers = answers[currentActivity.id] || {}
+      const allItemsClassified = currentActivity.items.every(item => activityAnswers[item.id])
+      
+      if (allItemsClassified) {
+        const allCorrect = currentActivity.items.every(item => {
+          const assignedCategory = activityAnswers[item.id]
+          return assignedCategory === item.correctCategoryId
+        })
+        markQuestionSubmitted(spec.id, currentActivity.id, allCorrect)
+      }
+      
       setCurrentActivityIndex(currentActivityIndex + 1)
     }
   }
@@ -97,6 +111,15 @@ export function ClassificationSet({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!allActivitiesComplete) return
+    
+    // Mark the last activity as submitted
+    const activityAnswers = answers[currentActivity.id] || {}
+    const allCorrect = currentActivity.items.every(item => {
+      const assignedCategory = activityAnswers[item.id]
+      return assignedCategory === item.correctCategoryId
+    })
+    markQuestionSubmitted(spec.id, currentActivity.id, allCorrect)
+    
     onSubmit({ answers })
   }
 

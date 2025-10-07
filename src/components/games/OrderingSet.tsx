@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import type { EvaluationResult } from '../../domain/events'
 import type { OrderingSetSpec, OrderingSetAnswer } from '../../domain/schema'
 import { OMIProgress } from '../OMIProgress'
+import { useRendererStore } from '../../lib/store'
 
 interface OrderingSetProps {
   spec: OrderingSetSpec
@@ -26,6 +27,7 @@ export function OrderingSet({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string[]>>(answer?.answers || {})
   const [showFeedback, setShowFeedback] = useState(false)
+  const markQuestionSubmitted = useRendererStore((state) => state.markQuestionSubmitted)
 
   // For the current question's ordering state
   const [currentOrder, setCurrentOrder] = useState<string[]>([])
@@ -127,6 +129,9 @@ export function OrderingSet({
 
   const handleNext = () => {
     if (!isLastQuestion) {
+      // Check if current question is answered correctly before moving
+      const isCorrect = currentOrder.every((item, index) => item === currentQuestion.items[index])
+      markQuestionSubmitted(spec.id, currentQuestion.id, isCorrect)
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     }
   }
@@ -140,6 +145,11 @@ export function OrderingSet({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!allAnswered) return
+    
+    // Mark the last question as submitted
+    const isCorrect = currentOrder.every((item, index) => item === currentQuestion.items[index])
+    markQuestionSubmitted(spec.id, currentQuestion.id, isCorrect)
+    
     onSubmit({ answers })
   }
 
