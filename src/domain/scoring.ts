@@ -18,6 +18,8 @@ import type {
   FillInTheBlanksSpec,
   FillInTheBlanksSetAnswer,
   FillInTheBlanksSetSpec,
+  ShowdownSetAnswer,
+  ShowdownSetSpec,
   ActivitySetAnswer,
   ActivitySetSpec,
   ClassificationSetAnswer,
@@ -34,6 +36,7 @@ export function canScoreLocally(type: GameSpec['type']): boolean {
     type === 'pair-match-set' ||
     type === 'fill-in-the-blanks' ||
     type === 'fill-in-the-blanks-set' ||
+    type === 'showdown-set' ||
     type === 'activity-set' ||
     type === 'classification-set'
   )
@@ -89,6 +92,10 @@ export function scoreGame(spec: GameSpec, answer: AnswerPayload): EvaluationResu
     case 'fill-in-the-blanks-set': {
       const payload = answer.payload as FillInTheBlanksSetAnswer
       return scoreFillInTheBlanksSet(spec as FillInTheBlanksSetSpec, payload)
+    }
+    case 'showdown-set': {
+      const payload = answer.payload as ShowdownSetAnswer
+      return scoreShowdownSet(spec as ShowdownSetSpec, payload)
     }
     case 'activity-set': {
       const payload = answer.payload as ActivitySetAnswer
@@ -439,6 +446,87 @@ function scoreFillInTheBlanksSet(
   return {
     gameId: spec.id,
     correct: overallCorrect,
+    score,
+    feedback,
+    omiEvidence,
+  }
+}
+
+function scoreShowdownSet(spec: ShowdownSetSpec, answer: ShowdownSetAnswer): EvaluationResult {
+  let correctShowdowns = 0
+  const omiEvidenceMap = new Map<string, { total: number; demonstrated: number }>()
+
+  for (const showdown of spec.showdowns) {
+    const showdownAnswer = answer.answers[showdown.id]
+    if (!showdownAnswer) continue
+
+    const selectedOptionCorrect = showdownAnswer.optionId === showdown.correctOptionId
+    const reasonIds = showdownAnswer.reasonIds || []
+    const reasonCorrectCount = showdown.reasonOptions.filter((reason) => reason.correct).length
+    const selectedReasonIds = reasonIds
+    const selectedReasonCorrect = selectedReasonIds.filter((id) => {
+      const reason = showdown.reasonOptions.find((r) => r.id === id)
+      return reason?.correct
+    }).length
+    const allRequiredReasonsSelected = showdown.reasonOptions
+      .filter((reason) => reason.correct)
+      .every((reason) => selectedReasonIds.includes(reason.id))
+    const noIncorrectReasonsSelected = selectedReasonIds.every((id) =>
+      showdown.reasonOptions.find((reason) => reason.id === id)?.correct,
+    )
+
+    const requiresImprovement = Boolean(showdown.improvementQuestion)
+    const improvementCorrect = requiresImprovement
+      ? Boolean(
+          showdown.improvementQuestion?.options.find(
+            (option) => option.id === showdownAnswer.improvementOptionId && option.correct,
+          ),
+        )
+      : true
+
+    const showdownCorrect =
+      selectedOptionCorrect &&
+      selectedReasonCorrect > 0 &&
+      selectedReasonCorrect === reasonCorrectCount &&
+      allRequiredReasonsSelected &&
+      noIncorrectReasonsSelected &&
+      improvementCorrect
+
+    if (showdownCorrect) {
+      correctShowdowns++
+    }
+
+    const omiIds = showdown.omiMapping || []
+    for (const omiId of omiIds) {
+      const existing = omiEvidenceMap.get(omiId) || { total: 0, demonstrated: 0 }
+      existing.total++
+      if (showdownCorrect) {
+        existing.demonstrated++
+      }
+      omiEvidenceMap.set(omiId, existing)
+    }
+  }
+
+  const totalShowdowns = spec.showdowns.length
+  const score = totalShowdowns > 0 ? correctShowdowns / totalShowdowns : 0
+  const allCorrect = correctShowdowns === totalShowdowns && totalShowdowns > 0
+
+  const feedback = allCorrect
+    ? 'Exceptional comparison work—every showdown is spot on.'
+    : correctShowdowns === 0
+    ? 'Revisit each scenario to choose the stronger interface and supporting reasons.'
+    : `Nice progress—${correctShowdowns} of ${totalShowdowns} showdowns are correct so far.`
+
+  const omiEvidence: OMIEvidence[] = Array.from(omiEvidenceMap.entries()).map(([omiId, stats]) => ({
+    omiId,
+    demonstrated: stats.demonstrated === stats.total,
+    accuracy: stats.total > 0 ? stats.demonstrated / stats.total : 0,
+    timestamp: new Date().toISOString(),
+  }))
+
+  return {
+    gameId: spec.id,
+    correct: allCorrect,
     score,
     feedback,
     omiEvidence,

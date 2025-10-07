@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { gameSpecSchema } from '../domain/schema'
-import type { AnswerPayload, GameSpec, MCQAnswer, MCQSetAnswer, OrderingAnswer, OrderingSetAnswer, PairMatchAnswer, PairMatchSetAnswer, FillInTheBlanksAnswer, ClassificationSetAnswer } from '../domain/schema'
+import type { AnswerPayload, GameSpec, MCQAnswer, MCQSetAnswer, OrderingAnswer, OrderingSetAnswer, PairMatchAnswer, PairMatchSetAnswer, FillInTheBlanksAnswer, ClassificationSetAnswer, ShowdownSetAnswer } from '../domain/schema'
 import type { EvaluationResult, RendererEventListener } from '../domain/events'
 import { scoreGame } from '../domain/scoring'
 import { useRendererStore } from '../lib/store'
@@ -12,6 +12,7 @@ import { PairMatch } from './games/PairMatch'
 import { PairMatchSet } from './games/PairMatchSet'
 import { FillInTheBlanks } from './games/FillInTheBlanks'
 import { ClassificationSet } from './games/ClassificationSet'
+import { ShowdownSet } from './games/ShowdownSet'
 import { OMIProgress } from './OMIProgress'
 
 interface GameRendererProps {
@@ -78,6 +79,7 @@ export function GameRenderer({ spec, onEvent }: GameRendererProps) {
   const answerEnvelope = useRendererStore((state) => state.answers[specId])
   const evaluation = useRendererStore((state) => state.evaluations[specId])
   const timer = useRendererStore((state) => state.timers[specId])
+  const disabled = Boolean(evaluation?.correct)
 
   const readyEmittedRef = useRef(false)
   const intervalRef = useRef<number | null>(null)
@@ -339,6 +341,18 @@ function renderGameComponent({ spec, answer, evaluation, disabled, onAnswerChang
           disabled={disabled}
           onAnswerChange={(classificationSetAnswer) => onAnswerChange(classificationSetAnswer)}
           onSubmit={(classificationSetAnswer) => onSubmit(classificationSetAnswer)}
+          onReset={onReset}
+        />
+      )
+    case 'showdown-set':
+      return (
+        <ShowdownSet
+          spec={spec}
+          answer={answer as ShowdownSetAnswer | undefined}
+          evaluation={evaluation}
+          disabled={disabled}
+          onAnswerChange={(payload) => onAnswerChange(payload)}
+          onSubmit={(payload) => onSubmit(payload)}
           onReset={onReset}
         />
       )

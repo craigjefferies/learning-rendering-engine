@@ -1,0 +1,171 @@
+{
+  "id": "set-as92006-showdown",
+  "type": "showdown-set",
+  "title": "Showdown: Usability Edition",
+  "description": "Compare interface scenarios, choose the stronger design, and justify your thinking with guided reasons.",
+  "showdowns": [
+    {
+      "id": "as92006-showdown-feedback-001",
+      "title": "Feedback Showdown",
+      "context": {
+        "interfaceA": {
+          "summary": "Shows only a spinner after submission.",
+          "details": [
+            "Displays a spinning wheel with no message.",
+            "Page reloads after 8 seconds.",
+            "No confirmation when the action succeeds."
+          ]
+        },
+        "interfaceB": {
+          "summary": "Progress bar with status updates.",
+          "details": [
+            "Shows an uploading progress bar with percentage.",
+            "Confirms success with \"Application sent!\".",
+            "Shows estimated remaining time."
+          ]
+        }
+      },
+      "prompt": "Which interface demonstrates stronger user feedback?",
+      "options": [
+        { "id": "A", "label": "Interface A", "description": "Shows only a spinner after submission." },
+        { "id": "B", "label": "Interface B", "description": "Displays a progress bar with status text." }
+      ],
+      "correctOptionId": "B",
+      "reasonOptions": [
+        {
+          "id": "feedback_status",
+          "label": "Provides clear status updates and completion confirmation.",
+          "correct": true
+        },
+        {
+          "id": "feedback_spinner",
+          "label": "Keeps the user informed by showing a spinner.",
+          "correct": false
+        },
+        {
+          "id": "feedback_error",
+          "label": "Helps users recover from errors quickly.",
+          "correct": false
+        },
+        {
+          "id": "feedback_confidence",
+          "label": "Reduces anxiety by confirming the outcome.",
+          "correct": true
+        }
+      ],
+      "omiMapping": [
+        "explain_usability_application",
+        "usability_effect_on_user"
+      ]
+    },
+    {
+      "id": "as92006-showdown-consistency-001",
+      "title": "Consistency Showdown",
+      "context": {
+        "interfaceA": {
+          "summary": "Button style changes across pages.",
+          "details": [
+            "Green button on home page.",
+            "Blue button on product page.",
+            "Grey button at checkout."
+          ]
+        },
+        "interfaceB": {
+          "summary": "Button stays green in the top-right throughout.",
+          "details": [
+            "Same colour and size on every page.",
+            "Position remains top-right.",
+            "Uses consistent iconography."
+          ]
+        }
+      },
+      "prompt": "Which interface demonstrates better consistency, and what benefit does it deliver?",
+      "options": [
+        { "id": "A", "label": "Interface A", "description": "Button colour and placement change on each page." },
+        { "id": "B", "label": "Interface B", "description": "Button colour, size, and placement stay the same." }
+      ],
+      "correctOptionId": "B",
+      "reasonOptions": [
+        {
+          "id": "consistency_predictability",
+          "label": "People learn where to find the button, reducing cognitive load.",
+          "correct": true
+        },
+        {
+          "id": "consistency_accessibility",
+          "label": "Changing colours helps with accessibility.",
+          "correct": false
+        },
+        {
+          "id": "consistency_brand",
+          "label": "Inconsistent design reinforces the brand identity.",
+          "correct": false
+        },
+        {
+          "id": "consistency_speed",
+          "label": "Consistency speeds up task completion because placement is predictable.",
+          "correct": true
+        }
+      ],
+      "omiMapping": [
+        "identify_usability_principles",
+        "usability_effect_on_user"
+      ]
+    },
+    {
+      "id": "as92006-showdown-comparison-001",
+      "title": "Usability Comparison Showdown",
+      "context": {
+        "interfaceA": {
+          "summary": "Tall results list with no way to narrow choices.",
+          "details": [
+            "Shows every flight in a single endlessly scrolling list.",
+            "Primary \"Book now\" button sits at the bottom of each card.",
+            "No filters or sort controls to reduce the set."
+          ]
+        },
+        "interfaceB": {
+          "summary": "Filterable list that keeps the booking action obvious.",
+          "details": [
+            "Filters for airline, price and departure time stay docked on screen.",
+            "Primary booking button is large and stays above the fold on every card.",
+            "Each result highlights key flight facts (duration, bag allowance, stops)."
+          ]
+        }
+      },
+      "prompt": "Which interface would most users find easier overall?",
+      "options": [
+        { "id": "A", "label": "Interface A", "description": "Shows every flight in one long list without filters." },
+        { "id": "B", "label": "Interface B", "description": "Provides filters and keeps the booking button visible." }
+      ],
+      "correctOptionId": "B",
+      "reasonOptions": [
+        {
+          "id": "comparison_filters",
+          "label": "Filters help users narrow options quickly.",
+          "correct": true
+        },
+        {
+          "id": "comparison_button",
+          "label": "Keeps the main booking button prominent on every card.",
+          "correct": true
+        },
+        {
+          "id": "comparison_info",
+          "label": "Offers all the fine-grained details upfront, so decisions are faster.",
+          "correct": false
+        },
+        {
+          "id": "comparison_scroll",
+          "label": "Scrolling a single page is always faster than using filters.",
+          "correct": false
+        }
+      ],
+      "omiMapping": [
+        "evaluate_comparative_usability",
+        "evaluate_heuristic_use",
+        "suggest_improvements"
+      ]
+    }
+  ]
+}

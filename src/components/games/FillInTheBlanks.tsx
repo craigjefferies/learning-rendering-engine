@@ -102,7 +102,9 @@ export function FillInTheBlanks({
     
     // Mark the last sentence as submitted
     const isCorrect = answers[currentSentence.id] === currentSentence.blank_answer
-    markQuestionSubmitted(spec.id, currentSentence.id, isCorrect)
+    if (isCorrect) {
+      markQuestionSubmitted(spec.id, currentSentence.id, true)
+    }
     
     onSubmit({ answers })
   }
@@ -118,8 +120,8 @@ export function FillInTheBlanks({
     if (!isLastSentence) {
       // Mark current sentence as submitted before moving to next
       const isCorrect = answers[currentSentence.id] === currentSentence.blank_answer
-      if (answers[currentSentence.id]) {
-        markQuestionSubmitted(spec.id, currentSentence.id, isCorrect)
+      if (answers[currentSentence.id] && isCorrect) {
+        markQuestionSubmitted(spec.id, currentSentence.id, true)
       }
       setCurrentSentenceIndex((prev) => prev + 1)
     }

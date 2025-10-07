@@ -131,7 +131,9 @@ export function OrderingSet({
     if (!isLastQuestion) {
       // Check if current question is answered correctly before moving
       const isCorrect = currentOrder.every((item, index) => item === currentQuestion.items[index])
-      markQuestionSubmitted(spec.id, currentQuestion.id, isCorrect)
+      if (isCorrect) {
+        markQuestionSubmitted(spec.id, currentQuestion.id, true)
+      }
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     }
   }
@@ -148,7 +150,9 @@ export function OrderingSet({
     
     // Mark the last question as submitted
     const isCorrect = currentOrder.every((item, index) => item === currentQuestion.items[index])
-    markQuestionSubmitted(spec.id, currentQuestion.id, isCorrect)
+    if (isCorrect) {
+      markQuestionSubmitted(spec.id, currentQuestion.id, true)
+    }
     
     onSubmit({ answers })
   }

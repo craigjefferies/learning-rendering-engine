@@ -158,7 +158,9 @@ export function PairMatchSet({
       const selectedRight = matches.get(pair.left)
       return selectedRight === pair.right
     })
-    markQuestionSubmitted(spec.id, currentQuestion.id, allCorrect)
+    if (allCorrect) {
+      markQuestionSubmitted(spec.id, currentQuestion.id, true)
+    }
     
     onSubmit({ answers })
   }

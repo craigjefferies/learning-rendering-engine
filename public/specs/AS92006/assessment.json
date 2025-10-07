@@ -74,6 +74,13 @@
       "type": "classification-set",
       "path": "/specs/AS92006/classification-set.json",
       "description": "Classify UI examples into appropriate usability categories"
+    },
+    {
+      "id": "showdown-set",
+      "title": "Showdown: Usability Edition",
+      "type": "showdown-set",
+      "path": "/specs/AS92006/showdown-set.json",
+      "description": "Compare interface scenarios to explain and evaluate usability principles"
     }
   ],
   "metadata": {

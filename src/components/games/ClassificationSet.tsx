@@ -92,7 +92,9 @@ export function ClassificationSet({
           const assignedCategory = questionAnswers[item.id]
           return assignedCategory === item.correctCategoryId
         })
-        markQuestionSubmitted(spec.id, currentQuestion.id, allCorrect)
+        if (allCorrect) {
+          markQuestionSubmitted(spec.id, currentQuestion.id, true)
+        }
       }
 
       setCurrentQuestionIndex((index) => index + 1)
@@ -114,7 +116,9 @@ export function ClassificationSet({
       const assignedCategory = questionAnswers[item.id]
       return assignedCategory === item.correctCategoryId
     })
-    markQuestionSubmitted(spec.id, currentQuestion.id, allCorrect)
+    if (allCorrect) {
+      markQuestionSubmitted(spec.id, currentQuestion.id, true)
+    }
 
     onSubmit({ answers })
   }

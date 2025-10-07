@@ -194,12 +194,23 @@ export const useRendererStore = create<RendererState>()(
       resetAskedQuestions: () =>
         set({ askedQuestions: [] }),
       markQuestionSubmitted: (gameId, questionId, correct) =>
-        set((state) => ({
-          submittedQuestions: [
-            ...state.submittedQuestions,
-            { gameId, questionId, correct, timestamp: new Date().toISOString() },
-          ],
-        })),
+        set((state) => {
+          const existingIndex = state.submittedQuestions.findIndex(
+            (entry) => entry.gameId === gameId && entry.questionId === questionId,
+          )
+
+          const submission = { gameId, questionId, correct, timestamp: new Date().toISOString() }
+
+          if (existingIndex >= 0) {
+            const next = [...state.submittedQuestions]
+            next[existingIndex] = submission
+            return { submittedQuestions: next }
+          }
+
+          return {
+            submittedQuestions: [...state.submittedQuestions, submission],
+          }
+        }),
       getSubmittedQuestionsForGame: (gameId) => {
         return get().submittedQuestions.filter((q) => q.gameId === gameId)
       },

@@ -212,6 +212,82 @@ export const classificationSetSpecSchema = z
   })
   .strict()
 
+// Showdown set: comparative reasoning prompts
+const showdownContextSchema = z
+  .object({
+    interfaceA: z
+      .object({
+        summary: z.string().min(1),
+        details: z.array(z.string().min(1)).min(1),
+      })
+      .strict(),
+    interfaceB: z
+      .object({
+        summary: z.string().min(1),
+        details: z.array(z.string().min(1)).min(1),
+      })
+      .strict(),
+  })
+  .strict()
+
+const showdownOptionSchema = z
+  .object({
+    id: z.string().min(1),
+    label: z.string().min(1),
+    description: z.string().min(1),
+  })
+  .strict()
+
+const showdownReasonSchema = z
+  .object({
+    id: z.string().min(1),
+    label: z.string().min(1),
+    correct: z.boolean(),
+  })
+  .strict()
+
+const showdownImprovementSchema = z
+  .object({
+    prompt: z.string().min(1),
+    options: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1),
+            label: z.string().min(1),
+            correct: z.boolean(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict()
+
+const showdownSchema = z
+  .object({
+    id: z.string().min(1),
+    title: z.string().optional(),
+    prompt: z.string().min(1),
+    context: showdownContextSchema,
+    options: z.array(showdownOptionSchema).min(2),
+    correctOptionId: z.string().min(1),
+    reasonOptions: z.array(showdownReasonSchema).min(2),
+    improvementQuestion: showdownImprovementSchema.optional(),
+    omiMapping: z.array(z.string()).optional(),
+  })
+  .strict()
+
+export const showdownSetSpecSchema = z
+  .object({
+    id: z.string().min(1),
+    type: z.literal('showdown-set'),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    metadata: metadataSchema.optional(),
+    showdowns: z.array(showdownSchema).min(1, 'Showdown set must have at least one showdown'),
+  })
+  .strict()
+
 // Activity-set: Mixed game types in one collection
 const activitySchema = z.discriminatedUnion('type', [
   mcqQuestionSchema,
@@ -244,6 +320,7 @@ export const gameSpecSchema = z.discriminatedUnion('type', [
   pairMatchSetSpecSchema,
   activitySetSpecSchema,
   classificationSetSpecSchema,
+  showdownSetSpecSchema,
 ])
 
 export type BaseGameSpec = z.infer<typeof baseGameSpecSchema>
@@ -257,6 +334,7 @@ export type OrderingSetSpec = z.infer<typeof orderingSetSpecSchema>
 export type PairMatchSetSpec = z.infer<typeof pairMatchSetSpecSchema>
 export type ActivitySetSpec = z.infer<typeof activitySetSpecSchema>
 export type ClassificationSetSpec = z.infer<typeof classificationSetSpecSchema>
+export type ShowdownSetSpec = z.infer<typeof showdownSetSpecSchema>
 export type GameSpec = z.infer<typeof gameSpecSchema>
 export type GameType = GameSpec['type']
 
@@ -331,6 +409,19 @@ export const fillInTheBlanksSetAnswerSchema = z
   })
   .strict()
 
+export const showdownSetAnswerSchema = z
+  .object({
+    answers: z.record(
+      z.string(), // showdownId
+      z.object({
+        optionId: z.string(),
+        reasonIds: z.array(z.string().min(1)),
+        improvementOptionId: z.string().optional(),
+      }).strict(),
+    ),
+  })
+  .strict()
+
 export const activitySetAnswerSchema = z
   .object({
     answers: z.record(z.string(), z.unknown()), // Record<activityId, activitySpecificAnswer>
@@ -355,6 +446,7 @@ export const answerPayloadSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pair-match-set'), payload: pairMatchSetAnswerSchema }),
   z.object({ type: z.literal('fill-in-the-blanks'), payload: fillInTheBlanksAnswerSchema }),
   z.object({ type: z.literal('fill-in-the-blanks-set'), payload: fillInTheBlanksSetAnswerSchema }),
+  z.object({ type: z.literal('showdown-set'), payload: showdownSetAnswerSchema }),
   z.object({ type: z.literal('activity-set'), payload: activitySetAnswerSchema }),
   z.object({ type: z.literal('classification-set'), payload: classificationSetAnswerSchema }),
 ])
@@ -367,6 +459,7 @@ export type PairMatchAnswer = z.infer<typeof pairMatchAnswerSchema>
 export type PairMatchSetAnswer = z.infer<typeof pairMatchSetAnswerSchema>
 export type FillInTheBlanksAnswer = z.infer<typeof fillInTheBlanksAnswerSchema>
 export type FillInTheBlanksSetAnswer = z.infer<typeof fillInTheBlanksSetAnswerSchema>
+export type ShowdownSetAnswer = z.infer<typeof showdownSetAnswerSchema>
 export type ActivitySetAnswer = z.infer<typeof activitySetAnswerSchema>
 export type ClassificationSetAnswer = z.infer<typeof classificationSetAnswerSchema>
 export type AnswerPayload = z.infer<typeof answerPayloadSchema>

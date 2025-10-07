@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { FormEvent } from 'react'
 import type { EvaluationResult } from '../../domain/events'
 import type { MCQSetSpec, MCQSetAnswer } from '../../domain/schema'
@@ -29,7 +29,9 @@ export function MCQSet({
   const [showFeedback, setShowFeedback] = useState(false)
   const [questionFeedback, setQuestionFeedback] = useState<Record<string, boolean>>({}) // Track if each question was answered correctly
   const [fadeIn, setFadeIn] = useState(true)
+  const [pendingCompletion, setPendingCompletion] = useState(false)
   const markQuestionSubmitted = useRendererStore((state) => state.markQuestionSubmitted)
+  const completionTimeoutRef = useRef<number | null>(null)
 
   const currentQuestion = spec.questions[currentQuestionIndex]
   const totalQuestions = spec.questions.length
@@ -52,6 +54,15 @@ export function MCQSet({
     }
   }, [evaluation])
 
+  useEffect(() => {
+    return () => {
+      if (completionTimeoutRef.current) {
+        clearTimeout(completionTimeoutRef.current)
+        completionTimeoutRef.current = null
+      }
+    }
+  }, [])
+
   const handleAnswerSelect = (questionId: string, optionId: string) => {
     const newAnswers = { ...answers, [questionId]: optionId }
     setAnswers(newAnswers)
@@ -60,23 +71,43 @@ export function MCQSet({
     const newFeedback = { ...questionFeedback }
     delete newFeedback[questionId]
     setQuestionFeedback(newFeedback)
+    if (completionTimeoutRef.current) {
+      clearTimeout(completionTimeoutRef.current)
+      completionTimeoutRef.current = null
+    }
+    setPendingCompletion(false)
   }
 
   const handleSubmitQuestion = () => {
     if (!currentAnswer) return
     
     const isCorrect = currentAnswer === currentQuestion.correctOptionId
-    const newFeedback = { ...questionFeedback, [currentQuestion.id]: isCorrect }
-    setQuestionFeedback(newFeedback)
+    const updatedFeedback = { ...questionFeedback, [currentQuestion.id]: isCorrect }
+    setQuestionFeedback(updatedFeedback)
     
-    // Mark question as submitted for progress tracking
-    markQuestionSubmitted(spec.id, currentQuestion.id, isCorrect)
-    
-    // Auto-advance to next question if correct and not the last question
-    if (isCorrect && !isLastQuestion) {
-      setTimeout(() => {
-        setCurrentQuestionIndex(currentQuestionIndex + 1)
-      }, 1500) // Wait 1.5 seconds to show feedback before advancing
+    if (isCorrect) {
+      markQuestionSubmitted(spec.id, currentQuestion.id, true)
+      const everyQuestionAnswered = spec.questions.every((q) => answers[q.id])
+      const everyQuestionCorrect = spec.questions.every((q) =>
+        q.id === currentQuestion.id ? true : updatedFeedback[q.id],
+      )
+
+      if (isLastQuestion && everyQuestionAnswered && everyQuestionCorrect) {
+        if (completionTimeoutRef.current) {
+          clearTimeout(completionTimeoutRef.current)
+        }
+        setPendingCompletion(true)
+        completionTimeoutRef.current = window.setTimeout(() => {
+          completionTimeoutRef.current = null
+          onSubmit({ answers })
+        }, 600)
+      }
+    } else {
+      if (completionTimeoutRef.current) {
+        clearTimeout(completionTimeoutRef.current)
+        completionTimeoutRef.current = null
+      }
+      setPendingCompletion(false)
     }
   }
 
@@ -86,16 +117,28 @@ export function MCQSet({
     delete newAnswers[currentQuestion.id]
     setAnswers(newAnswers)
     onAnswerChange({ answers: newAnswers })
-    
+
     const newFeedback = { ...questionFeedback }
     delete newFeedback[currentQuestion.id]
     setQuestionFeedback(newFeedback)
+    if (completionTimeoutRef.current) {
+      clearTimeout(completionTimeoutRef.current)
+      completionTimeoutRef.current = null
+    }
+    setPendingCompletion(false)
   }
 
   const handleSubmitAll = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (evaluation || pendingCompletion) return
     if (!allAnswered) return
+    if (completionTimeoutRef.current) {
+      clearTimeout(completionTimeoutRef.current)
+      completionTimeoutRef.current = null
+    }
+    setPendingCompletion(true)
     onSubmit({ answers })
+    markQuestionSubmitted(spec.id, currentQuestion.id, true)
   }
 
   const handleResetAll = () => {
@@ -104,6 +147,11 @@ export function MCQSet({
     setCurrentQuestionIndex(0)
     setShowFeedback(false)
     onReset()
+    if (completionTimeoutRef.current) {
+      clearTimeout(completionTimeoutRef.current)
+      completionTimeoutRef.current = null
+    }
+    setPendingCompletion(false)
   }
 
   const isCorrectOption = (optionId: string) => {
@@ -253,48 +301,52 @@ export function MCQSet({
       </div>
 
       {/* Navigation and Submit */}
-      <div className="flex items-center justify-center gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex gap-3">
-          {!hasSubmittedCurrent ? (
-            <button
-              type="button"
-              onClick={handleSubmitQuestion}
-              disabled={disabled || !currentAnswer}
-              className="rounded-lg bg-indigo-600 px-6 py-2 font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-400 dark:bg-indigo-500 dark:hover:bg-indigo-600"
-            >
-              Submit Answer
-            </button>
-          ) : questionFeedback[currentQuestion.id] === false ? (
-            <button
-              type="button"
-              onClick={handleTryAgain}
-              className="rounded-lg bg-amber-600 px-6 py-2 font-semibold text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
-            >
-              Try Again
-            </button>
-          ) : !isLastQuestion ? (
-            <span className="px-6 py-2 text-sm text-green-600 dark:text-green-400 font-medium">
-              Moving to next question...
-            </span>
-          ) : (
-            <button
-              type="submit"
-              disabled={disabled || !allAnswered}
-              className="rounded-lg bg-green-600 px-6 py-2 font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-400 dark:bg-green-500 dark:hover:bg-green-600"
-            >
-              ✓ Submit All
-            </button>
-          )}
-          {evaluation && (
-            <button
-              type="button"
-              onClick={handleResetAll}
-              className="rounded-lg border border-indigo-600 bg-transparent px-4 py-2 font-semibold text-indigo-600 hover:bg-indigo-50 dark:border-indigo-400 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
-            >
-              Start Over
-            </button>
-          )}
-        </div>
+      <div className="flex items-center justify-center gap-4 rounded-3xl border border-zinc-200 bg-white/80 p-4 shadow-sm">
+        {!hasSubmittedCurrent ? (
+          <button
+            type="button"
+            onClick={handleSubmitQuestion}
+            disabled={disabled || !currentAnswer}
+            className="rounded-full bg-zinc-900 px-6 py-2 text-sm font-semibold text-white shadow hover:bg-zinc-700 disabled:cursor-not-allowed disabled:bg-zinc-400"
+          >
+            Submit Answer
+          </button>
+        ) : questionFeedback[currentQuestion.id] === false ? (
+          <button
+            type="button"
+            onClick={handleTryAgain}
+            className="rounded-full border border-amber-500 px-6 py-2 text-sm font-semibold text-amber-600 hover:bg-amber-50"
+          >
+            Try Again
+          </button>
+        ) : !isLastQuestion ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (completionTimeoutRef.current) {
+                clearTimeout(completionTimeoutRef.current)
+                completionTimeoutRef.current = null
+              }
+              setPendingCompletion(false)
+              setCurrentQuestionIndex(currentQuestionIndex + 1)
+            }}
+            className="rounded-full border border-zinc-200 px-6 py-2 text-sm font-medium text-zinc-600 hover:border-zinc-300"
+          >
+            Next Question
+          </button>
+        ) : pendingCompletion ? (
+          <span className="text-sm font-semibold text-emerald-600">
+            All questions complete! Returning to the library…
+          </span>
+        ) : (
+          <button
+            type="submit"
+            disabled={disabled || !allAnswered}
+            className="rounded-full bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-400"
+          >
+            Finish Set
+          </button>
+        )}
       </div>
 
       {/* Final Feedback - only shown after submitting all */}
