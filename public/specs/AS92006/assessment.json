@@ -62,9 +62,9 @@
       "description": "Arrange user workflow steps in the correct sequence"
     },
     {
-      "id": "fillblanks-set",
+      "id": "fill-in-the-blanks-set",
       "title": "Usability Heuristics",
-      "type": "fillblanks-set",
+      "type": "fill-in-the-blanks-set",
       "path": "/specs/AS92006/fillblanks-set.json",
       "description": "Complete sentences about usability heuristics and design principles"
     },

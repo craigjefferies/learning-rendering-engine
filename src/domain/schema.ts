@@ -164,6 +164,19 @@ export const fillInTheBlanksSpecSchema = baseGameSpecSchema.extend({
   omiMapping: z.array(z.string()).optional(), // Specific OMIs for this question
 })
 
+export const fillInTheBlanksSetSpecSchema = z
+  .object({
+    id: z.string().min(1),
+    type: z.literal('fill-in-the-blanks-set'),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    metadata: metadataSchema.optional(),
+    questions: z
+      .array(fillInTheBlanksSpecSchema)
+      .min(1, 'Fill in the blanks set must have at least one question'),
+  })
+  .strict()
+
 // Classification game
 const categorySchema = z.object({
   id: z.string().min(1),
@@ -193,9 +206,9 @@ export const classificationSetSpecSchema = z
     title: z.string().optional(),
     description: z.string().optional(),
     metadata: metadataSchema.optional(),
-    activities: z
+    questions: z
       .array(classificationQuestionSchema)
-      .min(1, 'Classification set must have at least one activity'),
+      .min(1, 'Classification set must have at least one question'),
   })
   .strict()
 
@@ -225,6 +238,7 @@ export const gameSpecSchema = z.discriminatedUnion('type', [
   orderingSpecSchema, 
   pairMatchSpecSchema,
   fillInTheBlanksSpecSchema,
+  fillInTheBlanksSetSpecSchema,
   mcqSetSpecSchema,
   orderingSetSpecSchema,
   pairMatchSetSpecSchema,
@@ -237,6 +251,7 @@ export type MCQSpec = z.infer<typeof mcqSpecSchema>
 export type OrderingSpec = z.infer<typeof orderingSpecSchema>
 export type PairMatchSpec = z.infer<typeof pairMatchSpecSchema>
 export type FillInTheBlanksSpec = z.infer<typeof fillInTheBlanksSpecSchema>
+export type FillInTheBlanksSetSpec = z.infer<typeof fillInTheBlanksSetSpecSchema>
 export type MCQSetSpec = z.infer<typeof mcqSetSpecSchema>
 export type OrderingSetSpec = z.infer<typeof orderingSetSpecSchema>
 export type PairMatchSetSpec = z.infer<typeof pairMatchSetSpecSchema>
@@ -307,6 +322,15 @@ export const fillInTheBlanksAnswerSchema = z
   })
   .strict()
 
+export const fillInTheBlanksSetAnswerSchema = z
+  .object({
+    answers: z.record(
+      z.string(), // questionId
+      z.record(z.string(), z.string()), // Record<sentenceId, selectedWord>
+    ),
+  })
+  .strict()
+
 export const activitySetAnswerSchema = z
   .object({
     answers: z.record(z.string(), z.unknown()), // Record<activityId, activitySpecificAnswer>
@@ -330,6 +354,7 @@ export const answerPayloadSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pair-match'), payload: pairMatchAnswerSchema }),
   z.object({ type: z.literal('pair-match-set'), payload: pairMatchSetAnswerSchema }),
   z.object({ type: z.literal('fill-in-the-blanks'), payload: fillInTheBlanksAnswerSchema }),
+  z.object({ type: z.literal('fill-in-the-blanks-set'), payload: fillInTheBlanksSetAnswerSchema }),
   z.object({ type: z.literal('activity-set'), payload: activitySetAnswerSchema }),
   z.object({ type: z.literal('classification-set'), payload: classificationSetAnswerSchema }),
 ])
@@ -341,6 +366,7 @@ export type OrderingSetAnswer = z.infer<typeof orderingSetAnswerSchema>
 export type PairMatchAnswer = z.infer<typeof pairMatchAnswerSchema>
 export type PairMatchSetAnswer = z.infer<typeof pairMatchSetAnswerSchema>
 export type FillInTheBlanksAnswer = z.infer<typeof fillInTheBlanksAnswerSchema>
+export type FillInTheBlanksSetAnswer = z.infer<typeof fillInTheBlanksSetAnswerSchema>
 export type ActivitySetAnswer = z.infer<typeof activitySetAnswerSchema>
 export type ClassificationSetAnswer = z.infer<typeof classificationSetAnswerSchema>
 export type AnswerPayload = z.infer<typeof answerPayloadSchema>

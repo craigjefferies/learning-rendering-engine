@@ -324,6 +324,12 @@ function renderGameComponent({ spec, answer, evaluation, disabled, onAnswerChang
           onReset={onReset}
         />
       )
+    case 'fill-in-the-blanks-set':
+      return (
+        <p className="text-sm text-red-600">
+          Unsupported game type: fill-in-the-blanks-set
+        </p>
+      )
     case 'classification-set':
       return (
         <ClassificationSet

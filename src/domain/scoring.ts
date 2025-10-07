@@ -16,6 +16,8 @@ import type {
   PairMatchSpec,
   FillInTheBlanksAnswer,
   FillInTheBlanksSpec,
+  FillInTheBlanksSetAnswer,
+  FillInTheBlanksSetSpec,
   ActivitySetAnswer,
   ActivitySetSpec,
   ClassificationSetAnswer,
@@ -31,6 +33,7 @@ export function canScoreLocally(type: GameSpec['type']): boolean {
     type === 'pair-match' ||
     type === 'pair-match-set' ||
     type === 'fill-in-the-blanks' ||
+    type === 'fill-in-the-blanks-set' ||
     type === 'activity-set' ||
     type === 'classification-set'
   )
@@ -82,6 +85,10 @@ export function scoreGame(spec: GameSpec, answer: AnswerPayload): EvaluationResu
     case 'fill-in-the-blanks': {
       const payload = answer.payload as FillInTheBlanksAnswer
       return scoreFillInTheBlanks(spec, payload)
+    }
+    case 'fill-in-the-blanks-set': {
+      const payload = answer.payload as FillInTheBlanksSetAnswer
+      return scoreFillInTheBlanksSet(spec as FillInTheBlanksSetSpec, payload)
     }
     case 'activity-set': {
       const payload = answer.payload as ActivitySetAnswer
@@ -375,6 +382,69 @@ function scoreFillInTheBlanks(spec: FillInTheBlanksSpec, answer: FillInTheBlanks
   }
 }
 
+function scoreFillInTheBlanksSet(
+  spec: FillInTheBlanksSetSpec,
+  answer: FillInTheBlanksSetAnswer,
+): EvaluationResult {
+  const questionResults: Array<{ correct: boolean; accuracy: number; omiIds: string[] }> = []
+  let totalCorrect = 0
+
+  for (const question of spec.questions) {
+    const questionAnswer = answer.answers[question.id] || {}
+    const totalSentences = question.sentences.length
+    let correctBlanks = 0
+
+    for (const sentence of question.sentences) {
+      if (questionAnswer[sentence.id] === sentence.blank_answer) {
+        correctBlanks++
+      }
+    }
+
+    const accuracy = totalSentences > 0 ? correctBlanks / totalSentences : 0
+    const correct = accuracy === 1
+    if (correct) totalCorrect++
+
+    const omiIds = question.metadata?.omis ?? []
+    questionResults.push({ correct, accuracy, omiIds })
+  }
+
+  const score = spec.questions.length > 0 ? totalCorrect / spec.questions.length : 0
+  const overallCorrect = totalCorrect === spec.questions.length
+
+  const feedback = overallCorrect
+    ? 'Outstanding! Every blank across the set is correct.'
+    : totalCorrect === 0
+      ? 'Keep practising. Review the terms and try again.'
+      : 'Great effort. Review the highlighted sentences and try again.'
+
+  const omiEvidenceMap = new Map<string, { correct: number; total: number; totalAccuracy: number }>()
+
+  for (const result of questionResults) {
+    for (const omiId of result.omiIds) {
+      const existing = omiEvidenceMap.get(omiId) || { correct: 0, total: 0, totalAccuracy: 0 }
+      existing.total++
+      existing.totalAccuracy += result.accuracy
+      if (result.correct) existing.correct++
+      omiEvidenceMap.set(omiId, existing)
+    }
+  }
+
+  const omiEvidence: OMIEvidence[] = Array.from(omiEvidenceMap.entries()).map(([omiId, stats]) => ({
+    omiId,
+    demonstrated: stats.correct === stats.total,
+    accuracy: stats.total > 0 ? stats.totalAccuracy / stats.total : 0,
+    timestamp: new Date().toISOString(),
+  }))
+
+  return {
+    gameId: spec.id,
+    correct: overallCorrect,
+    score,
+    feedback,
+    omiEvidence,
+  }
+}
+
 function scoreActivitySet(spec: ActivitySetSpec, answer: ActivitySetAnswer): EvaluationResult {
   const activityResults: Array<{ correct: boolean; accuracy: number; omiIds: string[] }> = []
   let totalCorrect = 0
@@ -484,24 +554,24 @@ function scoreClassificationSet(spec: ClassificationSetSpec, answer: Classificat
   const activityResults: Array<{ correct: boolean; accuracy: number; omiIds: string[] }> = []
   let totalCorrect = 0
   
-  // Score each activity
-  for (const activity of spec.activities) {
-    const activityAnswers = answer.answers[activity.id] || {}
+  // Score each question
+  for (const question of spec.questions) {
+    const questionAnswers = answer.answers[question.id] || {}
     
     let correctClassifications = 0
-    for (const item of activity.items) {
-      const assignedCategoryId = activityAnswers[item.id]
+    for (const item of question.items) {
+      const assignedCategoryId = questionAnswers[item.id]
       if (assignedCategoryId === item.correctCategoryId) {
         correctClassifications++
       }
     }
     
-    const accuracy = activity.items.length > 0 ? correctClassifications / activity.items.length : 0
-    const correct = correctClassifications === activity.items.length
+    const accuracy = question.items.length > 0 ? correctClassifications / question.items.length : 0
+    const correct = correctClassifications === question.items.length
     if (correct) totalCorrect++
     
-    // Get OMI IDs for this activity
-    const omiIds = activity.omiMapping || []
+    // Get OMI IDs for this question
+    const omiIds = question.omiMapping || []
     activityResults.push({ correct, accuracy, omiIds })
   }
   
@@ -528,16 +598,16 @@ function scoreClassificationSet(spec: ClassificationSetSpec, answer: Classificat
     })
   )
   
-  const allCorrect = totalCorrect === spec.activities.length
-  const score = totalCorrect / spec.activities.length
+  const allCorrect = totalCorrect === spec.questions.length
+  const score = spec.questions.length > 0 ? totalCorrect / spec.questions.length : 0
   
   return {
     gameId: spec.id,
     correct: allCorrect,
     score,
     feedback: allCorrect 
-      ? `Perfect! You correctly classified all items in ${spec.activities.length} ${spec.activities.length === 1 ? 'activity' : 'activities'}!`
-      : `You got ${totalCorrect} out of ${spec.activities.length} ${spec.activities.length === 1 ? 'activity' : 'activities'} completely correct.`,
+      ? `Perfect! You correctly classified all items in ${spec.questions.length} ${spec.questions.length === 1 ? 'question' : 'questions'}!`
+      : `You got ${totalCorrect} out of ${spec.questions.length} ${spec.questions.length === 1 ? 'question' : 'questions'} completely correct.`,
     omiEvidence,
   }
 }

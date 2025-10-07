@@ -3,41 +3,16 @@
   "type": "classification-set",
   "title": "Usability Principles Classification (Expanded)",
   "description": "Drag each interface scenario into the correct usability principle category.",
-  "activities": [
+  "questions": [
     {
-      "id": "usability-principles-classification-expanded",
+      "id": "usability-principles-classification-001",
       "type": "classification",
-      "title": "User Interface Examples",
+      "title": "Core Principles (Set 1)",
       "prompt": "Classify each example according to the usability principle it demonstrates:",
       "categories": [
-        {
-          "id": "error-prevention",
-          "name": "Error Prevention"
-        },
-        {
-          "id": "feedback",
-          "name": "Feedback / System Status"
-        },
-        {
-          "id": "consistency",
-          "name": "Consistency"
-        },
-        {
-          "id": "minimalism",
-          "name": "Minimalism & Simplicity"
-        },
-        {
-          "id": "user-control",
-          "name": "User Control & Freedom"
-        },
-        {
-          "id": "recognition",
-          "name": "Recognition vs. Recall"
-        },
-        {
-          "id": "accessibility",
-          "name": "Accessibility"
-        }
+        { "id": "error-prevention", "name": "Error Prevention" },
+        { "id": "feedback", "name": "Feedback / System Status" },
+        { "id": "consistency", "name": "Consistency" }
       ],
       "items": [
         {
@@ -56,14 +31,28 @@
           "correctCategoryId": "consistency"
         },
         {
+          "id": "item9",
+          "text": "A government website correctly uses macrons for words like 'kōrero' and 'whānau' in all its menus and headings.",
+          "correctCategoryId": "consistency"
+        }
+      ],
+      "omiMapping": ["2.2.1", "2.2.2", "2.3.1"]
+    },
+    {
+      "id": "usability-principles-classification-002",
+      "type": "classification",
+      "title": "Design Choices (Set 2)",
+      "prompt": "Classify each example according to the usability principle it demonstrates:",
+      "categories": [
+        { "id": "minimalism", "name": "Minimalism & Simplicity" },
+        { "id": "user-control", "name": "User Control & Freedom" },
+        { "id": "recognition", "name": "Recognition vs. Recall" }
+      ],
+      "items": [
+        {
           "id": "item4",
           "text": "The homepage displays only essential options: Login, Sign Up, and Learn More.",
           "correctCategoryId": "minimalism"
-        },
-        {
-          "id": "item5",
-          "text": "When entering a password, a strength meter shows if it's weak, medium, or strong in real-time.",
-          "correctCategoryId": "feedback"
         },
         {
           "id": "item6",
@@ -74,16 +63,29 @@
           "id": "item7",
           "text": "A form provides a dropdown list of countries instead of making the user type one.",
           "correctCategoryId": "recognition"
+        }
+      ],
+      "omiMapping": ["2.2.1", "2.2.2", "2.3.1"]
+    },
+    {
+      "id": "usability-principles-classification-003",
+      "type": "classification",
+      "title": "Support & Inclusion (Set 3)",
+      "prompt": "Classify each example according to the usability principle it demonstrates:",
+      "categories": [
+        { "id": "feedback", "name": "Feedback / System Status" },
+        { "id": "accessibility", "name": "Accessibility" }
+      ],
+      "items": [
+        {
+          "id": "item5",
+          "text": "When entering a password, a strength meter shows if it's weak, medium, or strong in real-time.",
+          "correctCategoryId": "feedback"
         },
         {
           "id": "item8",
           "text": "The website uses high-contrast text and provides 'alt text' for all images for screen readers.",
           "correctCategoryId": "accessibility"
-        },
-        {
-          "id": "item9",
-          "text": "A government website correctly uses macrons for words like 'kōrero' and 'whānau' in all its menus and headings.",
-          "correctCategoryId": "consistency"
         }
       ],
       "omiMapping": ["2.2.1", "2.2.2", "2.3.1"]

@@ -290,46 +290,61 @@ export default function App() {
                 
                 console.log(`Loaded ${spec.path}:`, Array.isArray(json) ? `Array of ${json.length} items` : 'Single object')
                 
-                // Shuffle questions/sentences/activities within each set
-                if (Array.isArray(json)) {
-                  // Handle array of games (e.g., fillblanks-set.json)
-                  const shuffledGames = shuffleArray(json)
+                if (json && typeof json === 'object' && !Array.isArray(json)) {
+                  const data = { ...(json as Record<string, unknown>) }
 
-                  console.log(`  Expanding into ${shuffledGames.length} separate specs`)
+                  // Expand fill-in-the-blanks sets into individual games
+                  if (data.type === 'fill-in-the-blanks-set' && Array.isArray((data as any).questions)) {
+                    const questionSet = (data as any).questions as any[]
+                    const shuffledQuestions = shuffleArray(questionSet)
 
-                  // Return multiple specs, one for each game in the array
-                  return shuffledGames.map((game: any, index: number) => {
-                    // Shuffle sentences within each game
-                    if (game.questions) {
-                      game.questions = shuffleArray(game.questions)
-                    } else if (game.sentences) {
-                      game.sentences = shuffleArray(game.sentences)
-                    } else if (game.activities) {
-                      game.activities = shuffleArray(game.activities)
-                    }
+                    console.log(`  Expanding fill-in-the-blanks set into ${shuffledQuestions.length} specs`)
 
-                    return {
-                      label: `${spec.label} (${index + 1})`,
-                      path: `${spec.path}#${index}`,
-                      source: game,
-                      error: undefined,
-                    }
-                  })
-                }
+                    return shuffledQuestions.map((question, index) => {
+                      const clonedQuestion = { ...question }
+                      if (Array.isArray(clonedQuestion.sentences)) {
+                        clonedQuestion.sentences = shuffleArray(clonedQuestion.sentences)
+                      }
 
-                const shuffledJson = typeof json === 'object' && json !== null ? { ...(json as any) } : json
-                if (shuffledJson && typeof shuffledJson === 'object') {
-                  const data = shuffledJson as any
-                  if (data.questions) {
-                    data.questions = shuffleArray(data.questions)
-                  } else if (data.sentences) {
-                    data.sentences = shuffleArray(data.sentences)
-                  } else if (data.activities) {
-                    data.activities = shuffleArray(data.activities)
+                      return {
+                        label: `${spec.label} (${index + 1})`,
+                        path: `${spec.path}#${index}`,
+                        source: clonedQuestion,
+                        error: undefined,
+                      }
+                    })
                   }
+
+                  if ('questions' in data && Array.isArray((data as any).questions)) {
+                    (data as any).questions = shuffleArray((data as any).questions as any[]).map((question: any) => {
+                      if (Array.isArray(question.sentences)) {
+                        return { ...question, sentences: shuffleArray(question.sentences) }
+                      }
+                      if (Array.isArray(question.activities)) {
+                        return { ...question, activities: shuffleArray(question.activities) }
+                      }
+                      return question
+                    })
+                  } else if ('sentences' in data && Array.isArray((data as any).sentences)) {
+                    (data as any).sentences = shuffleArray((data as any).sentences)
+                  } else if ('activities' in data && Array.isArray((data as any).activities)) {
+                    (data as any).activities = shuffleArray((data as any).activities)
+                  }
+
+                  return [{ ...spec, source: data }]
                 }
-                
-                return [{ ...spec, source: shuffledJson }]
+
+                if (Array.isArray(json)) {
+                  const shuffled = shuffleArray(json)
+                  return shuffled.map((entry: any, index: number) => ({
+                    label: `${spec.label} (${index + 1})`,
+                    path: `${spec.path}#${index}`,
+                    source: entry,
+                    error: undefined,
+                  }))
+                }
+
+                return [{ ...spec, source: json }]
               } catch (err) {
                 console.error(`Error fetching ${spec.path}:`, err)
                 return [{ ...spec, source: null, error: err instanceof Error ? err.message : 'Fetch failed' }]
