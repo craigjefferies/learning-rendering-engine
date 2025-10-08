@@ -22,7 +22,7 @@ export function MCQSet({
   evaluation,
   onAnswerChange,
   onSubmit,
-  onReset,
+  onReset: _onReset,
 }: MCQSetProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>(answer?.answers || {})
@@ -139,19 +139,6 @@ export function MCQSet({
     setPendingCompletion(true)
     onSubmit({ answers })
     markQuestionSubmitted(spec.id, currentQuestion.id, true)
-  }
-
-  const handleResetAll = () => {
-    setAnswers({})
-    setQuestionFeedback({})
-    setCurrentQuestionIndex(0)
-    setShowFeedback(false)
-    onReset()
-    if (completionTimeoutRef.current) {
-      clearTimeout(completionTimeoutRef.current)
-      completionTimeoutRef.current = null
-    }
-    setPendingCompletion(false)
   }
 
   const isCorrectOption = (optionId: string) => {

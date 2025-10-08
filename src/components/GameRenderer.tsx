@@ -79,7 +79,6 @@ export function GameRenderer({ spec, onEvent }: GameRendererProps) {
   const answerEnvelope = useRendererStore((state) => state.answers[specId])
   const evaluation = useRendererStore((state) => state.evaluations[specId])
   const timer = useRendererStore((state) => state.timers[specId])
-  const disabled = Boolean(evaluation?.correct)
 
   const readyEmittedRef = useRef(false)
   const intervalRef = useRef<number | null>(null)

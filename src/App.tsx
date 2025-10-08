@@ -507,8 +507,8 @@ export default function App() {
       const specData = spec.source as any
       const normalizedLabel = spec.label.replace(/\s*\(\d+\)$/u, '').trim()
       const units = extractUnitsForSpec(spec)
-      const unitsComplete = units.every((unit) =>
-        unit.requiredIds.every((id) => {
+      const unitsComplete = units.every((unit: { gameId: string; requiredIds: string[] }) =>
+        unit.requiredIds.every((id: string) => {
           const record = overallProgress.allQuestions.find(
             (question) => question.gameId === unit.gameId && question.questionId === id,
           )
@@ -520,7 +520,7 @@ export default function App() {
         index,
         basePath,
         label: normalizedLabel,
-        description: specData?.description || spec.description,
+        description: specData?.description,
         rawType: specData?.type ?? '',
         units,
         completed: units.length > 0 ? unitsComplete : false,
@@ -560,8 +560,8 @@ export default function App() {
     return Array.from(groups.values()).map((group) => {
       const allUnits = group.specs.flatMap((meta) => meta.units)
       const totalUnits = allUnits.length || group.specs.length
-      const answeredUnits = allUnits.filter((unit) =>
-        unit.requiredIds.every((id) => {
+      const answeredUnits = allUnits.filter((unit: { gameId: string; requiredIds: string[] }) =>
+        unit.requiredIds.every((id: string) => {
           const record = overallProgress.allQuestions.find(
             (question) => question.gameId === unit.gameId && question.questionId === id,
           )
